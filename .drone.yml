@@ -1,9 +1,13 @@
 pipeline:
-  docker:
-    image: plugins/docker
-    repo: azuracast/azuracast_web
-    tags:
-     - latest
-    secrets: [ docker_username, docker_password ]
-    build_args:
-     - PLUGIN_PULL_IMAGE=true
+  build:
+    image: docker
+    commands:
+      - docker build -t $DOCKER_IMAGE_NAME .
+      - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+      - docker push $DOCKER_IMAGE_NAME
+    environment:
+      - DOCKER_IMAGE_NAME=azuracast/azuracast_web
+      - DOCKER_USERNAME=$$DOCKER_USERNAME
+      - DOCKER_PASSWORD=$$DOCKER_PASSWORD
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock

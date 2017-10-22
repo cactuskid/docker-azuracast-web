@@ -11,7 +11,8 @@ RUN mkdir -p /var/azuracast/www_tmp && \
 
 # Create azuracast user.
 RUN adduser --home /var/azuracast --disabled-password --gecos "" azuracast && \
-    chown -R azuracast:azuracast /var/azuracast
+    chown -R azuracast:azuracast /var/azuracast && \
+    echo 'azuracast ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 
 # Install Git
 RUN apt-get update && \
@@ -60,7 +61,8 @@ ADD ./supervisord_core.conf /etc/supervisor/conf.d/core.conf
 
 # AzuraCast installer and update commands
 COPY scripts/ /usr/bin
-RUN chmod a+x /usr/bin/azuracast_*
+RUN chmod a+x /usr/bin/azuracast_* && \
+    chmod a+x /usr/bin/locale_*
 
 # Default functionality
 EXPOSE 9000

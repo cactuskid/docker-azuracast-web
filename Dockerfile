@@ -1,34 +1,43 @@
-FROM php:7.1-fpm-jessie
+FROM ubuntu:xenial
 
-# Create azuracast user.
-RUN adduser --home /var/azuracast --disabled-password --gecos "" azuracast \
-    && usermod -aG www-data azuracast
+# Install essential packages
+RUN apt-get update && \
+    apt-get install -q -y --no-install-recommends apt-transport-https curl wget tar python-software-properties \
+     software-properties-common pwgen whois lnav sudo cron zip unzip
 
 # Set directory permissions
-RUN mkdir -p /var/azuracast/www_tmp \
-    && chmod -R 777 /var/azuracast/www_tmp
+RUN mkdir -p /var/azuracast/www_tmp && \
+    chmod -R 777 /var/azuracast/www_tmp
 
-# Install PHP extensions
-RUN apt-get update \
-    && apt-get install -y \
-        libfreetype6-dev libjpeg62-turbo-dev libpng-dev \
-        libicu-dev g++ \
-        zlib1g-dev \
-        gettext \
-    && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
-    && docker-php-ext-install -j$(nproc) gd intl zip pdo pdo_mysql gettext
+# Create azuracast user.
+RUN adduser --home /var/azuracast --disabled-password --gecos "" azuracast && \
+    chown -R azuracast:azuracast /var/azuracast && \
+    echo 'azuracast ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 
-# Install PHP ext Redis
-RUN pecl install redis-3.1.4 \
-    && docker-php-ext-enable redis
+# Install Git
+RUN apt-get update && \
+    apt-get install -q -y git
 
-COPY ./phpfpmpool.conf /usr/local/etc/php-fpm.d/www.conf
-COPY ./php.ini /usr/local/etc/php/conf.d/05-azuracast.ini
+# Install PHP 7.1
+RUN LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php && \
+    apt-get update && \
+    apt-get install -q -y --no-install-recommends php7.1-fpm php7.1-cli php7.1-gd php7.1-curl php7.1-xml \
+     php7.1-zip php7.1-mysqlnd php7.1-mbstring php7.1-intl php7.1-redis
+
+RUN mkdir -p /run/php
+RUN touch /run/php/php7.1-fpm.pid
+
+COPY ./php.ini /etc/php/7.1/fpm/conf.d/05-azuracast.ini
+COPY ./php.ini /etc/php/7.1/cli/conf.d/05-azuracast.ini
+COPY ./phpfpmpool.conf /etc/php/7.1/fpm/pool.d/www.conf
+
+# Install composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
 
 # Set up locales
 COPY ./locale.gen /etc/locale.gen
 RUN apt-get update && \
-    apt-get install -q -y locales
+    apt-get install -q -y locales gettext
 
 # Set up crontab tasks
 ADD crontab /etc/cron.d/azuracast-cron
@@ -38,4 +47,24 @@ RUN touch /var/log/cron.log
 # Alert AzuraCast that we're in docker
 RUN touch /var/azuracast/.docker
 
-WORKDIR /var/azuracast/www
+# Install PIP and Ansible/Supervisord
+RUN mkdir -p /var/log/supervisor
+RUN add-apt-repository -y ppa:ansible/ansible && \
+    apt-get update && \
+    apt-get install -q -y --no-install-recommends python2.7 python-pip python-setuptools \
+      python-wheel python-mysqldb ansible supervisor && \
+    pip install --upgrade pip && \
+    pip install influxdb
+
+ADD ./supervisord.conf /etc/supervisor/supervisord.conf
+ADD ./supervisord_core.conf /etc/supervisor/conf.d/core.conf
+
+# AzuraCast installer and update commands
+COPY scripts/ /usr/bin
+RUN chmod a+x /usr/bin/azuracast_* && \
+    chmod a+x /usr/bin/locale_*
+
+# Default functionality
+EXPOSE 9000
+
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]

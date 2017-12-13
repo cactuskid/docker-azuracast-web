@@ -13,18 +13,18 @@ RUN adduser --home /var/azuracast --disabled-password --gecos "" azuracast \
     && mkdir -p /var/azuracast/www_tmp \
     && chmod -R 777 /var/azuracast/www_tmp
 
-# Install PHP 7.1
+# Install PHP 7.2
 RUN LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php \
     && apt-get update \
-    && apt-get install -q -y --no-install-recommends php7.1-fpm php7.1-cli php7.1-gd \
-     php7.1-curl php7.1-xml php7.1-zip php7.1-mysqlnd php7.1-mbstring php7.1-intl php7.1-redis
+    && apt-get install -q -y --no-install-recommends php7.2-fpm php7.2-cli php7.2-gd \
+     php7.2-curl php7.2-xml php7.2-zip php7.2-mysqlnd php7.2-mbstring php7.2-intl php7.2-redis
 
 RUN mkdir -p /run/php
-RUN touch /run/php/php7.1-fpm.pid
+RUN touch /run/php/php7.2-fpm.pid
 
-COPY ./php.ini /etc/php/7.1/fpm/conf.d/05-azuracast.ini
-COPY ./php.ini /etc/php/7.1/cli/conf.d/05-azuracast.ini
-COPY ./phpfpmpool.conf /etc/php/7.1/fpm/pool.d/www.conf
+COPY ./php.ini /etc/php/7.2/fpm/conf.d/05-azuracast.ini
+COPY ./php.ini /etc/php/7.2/cli/conf.d/05-azuracast.ini
+COPY ./phpfpmpool.conf /etc/php/7.2/fpm/pool.d/www.conf
 
 # Install composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
@@ -55,4 +55,4 @@ COPY scripts/ /usr/bin
 RUN chmod a+x /usr/bin/azuracast_* && \
     chmod a+x /usr/bin/locale_*
 
-CMD ["/usr/sbin/php-fpm7.1", "-F", "--fpm-config", "/etc/php/7.1/fpm/php-fpm.conf", "-c", "/etc/php/7.1/fpm/"]
+CMD ["/usr/sbin/php-fpm7.2", "-F", "--fpm-config", "/etc/php/7.2/fpm/php-fpm.conf", "-c", "/etc/php/7.2/fpm/"]

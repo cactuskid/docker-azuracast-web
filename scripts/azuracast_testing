@@ -3,6 +3,7 @@
 echo "Installing AzuraCast (Functional Testing Mode)"
 
 sudo ansible-playbook /var/azuracast/www/util/ansible/docker_install.yml --inventory=/var/azuracast/www/util/ansible/hosts --extra-vars "app_env=development testing_mode=true" && \
+    sudo apt-get update && \
     sudo apt-get install -y php-pear php7.2-dev && \
     sudo pear config-set php_ini /etc/php/7.2/cli/php.ini && \
     sudo pecl config-set php_ini /etc/php/7.2/cli/php.ini && \

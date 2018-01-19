@@ -8,10 +8,11 @@ RUN apt-get update && \
 
 # Create azuracast user.
 RUN adduser --home /var/azuracast --disabled-password --gecos "" azuracast \
-    && chown -R azuracast:azuracast /var/azuracast \
-    && echo 'azuracast ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers \
+    && mkdir -p /var/azuracast/www \
     && mkdir -p /var/azuracast/www_tmp \
-    && chmod -R 777 /var/azuracast/www_tmp
+    && chown -R azuracast:azuracast /var/azuracast \
+    && chmod -R 777 /var/azuracast/www_tmp \
+    && echo 'azuracast ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 
 # Install PHP 7.2
 RUN LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php \
@@ -54,5 +55,17 @@ RUN add-apt-repository -y ppa:ansible/ansible && \
 COPY scripts/ /usr/bin
 RUN chmod a+x /usr/bin/azuracast_* && \
     chmod a+x /usr/bin/locale_*
+
+# Clone repo and set up AzuraCast repo
+USER azuracast
+
+WORKDIR /var/azuracast/www
+
+RUN git clone https://github.com/AzuraCast/AzuraCast.git . \
+    && composer install
+
+VOLUME /var/azuracast/www
+
+USER root
 
 CMD ["/usr/sbin/php-fpm7.2", "-F", "--fpm-config", "/etc/php/7.2/fpm/php-fpm.conf", "-c", "/etc/php/7.2/fpm/"]

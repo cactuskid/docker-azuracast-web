@@ -2,19 +2,18 @@
 
 echo "Installing AzuraCast (Functional Testing Mode)"
 
-sudo ansible-playbook /var/azuracast/www/util/ansible/docker_install.yml --inventory=/var/azuracast/www/util/ansible/hosts --extra-vars "app_env=development testing_mode=true" && \
-    sudo apt-get update && \
-    sudo apt-get install -y php-pear php7.2-dev && \
-    sudo pear config-set php_ini /etc/php/7.2/cli/php.ini && \
-    sudo pecl config-set php_ini /etc/php/7.2/cli/php.ini && \
-    sudo pecl install xdebug-beta && \
-    cd /var/azuracast/www && \
-    sudo -u azuracast ./vendor/bin/codecept run --no-interaction --coverage --coverage-xml --fail-fast && \
-    sudo -u azuracast CODECLIMATE_REPO_TOKEN=$1 ./vendor/bin/test-reporter --coverage-report=tests/_output/coverage.xml
-
-# Temporarily removed until php7.2-xdebug is ready
 # sudo ansible-playbook /var/azuracast/www/util/ansible/docker_install.yml --inventory=/var/azuracast/www/util/ansible/hosts --extra-vars "app_env=development testing_mode=true" && \
-#     sudo apt-get install -y php7.2-xdebug && \
+#     sudo apt-get update && \
+#     sudo apt-get install -y php-pear php7.2-dev && \
+#     sudo pear config-set php_ini /etc/php/7.2/cli/php.ini && \
+#     sudo pecl config-set php_ini /etc/php/7.2/cli/php.ini && \
+#     sudo pecl install xdebug-beta && \
 #     cd /var/azuracast/www && \
 #     sudo -u azuracast ./vendor/bin/codecept run --no-interaction --coverage --coverage-xml --fail-fast && \
 #     sudo -u azuracast CODECLIMATE_REPO_TOKEN=$1 ./vendor/bin/test-reporter --coverage-report=tests/_output/coverage.xml
+
+sudo ansible-playbook /var/azuracast/www/util/ansible/docker_install.yml --inventory=/var/azuracast/www/util/ansible/hosts --extra-vars "app_env=development testing_mode=true" && \
+    sudo apt-get install -y php7.2-xdebug && \
+    cd /var/azuracast/www && \
+    sudo -u azuracast ./vendor/bin/codecept run --no-interaction --coverage --coverage-xml --fail-fast && \
+    sudo -u azuracast CODECLIMATE_REPO_TOKEN=$1 ./vendor/bin/test-reporter --coverage-report=tests/_output/coverage.xml

@@ -55,6 +55,7 @@ RUN curl -L https://github.com/dshearer/jobber/releases/download/v1.3.2/jobber_1
     apt-get install -f && \
     rm jobber.deb
 
+ADD ./jobber.conf.yml /etc/jobber.conf
 ADD ./jobber.yml /var/azuracast/.jobber
 
 RUN chown azuracast:azuracast /var/azuracast/.jobber && \

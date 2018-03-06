@@ -4,7 +4,7 @@ FROM ubuntu:xenial
 RUN apt-get update && \
     apt-get install -q -y --no-install-recommends apt-transport-https curl wget tar \
         python-software-properties software-properties-common pwgen whois lnav sudo \
-        cron zip unzip git
+        zip unzip git
 
 # Create azuracast user.
 RUN adduser --home /var/azuracast --disabled-password --gecos "" azuracast \
@@ -36,13 +36,6 @@ COPY locale.gen /etc/locale.gen
 RUN apt-get update \
     && apt-get install -q -y locales gettext
 
-# Set up crontab tasks
-ADD crontab /etc/cron.d/azuracast-cron
-
-RUN chmod 0644 /etc/cron.d/azuracast-cron \
-    && touch /var/log/cron.log \
-    && touch /var/azuracast/.docker
-
 # Install PIP and Ansible
 RUN add-apt-repository -y ppa:ansible/ansible && \
     apt-get update && \
@@ -54,15 +47,29 @@ RUN add-apt-repository -y ppa:ansible/ansible && \
 # AzuraCast installer and update commands
 COPY scripts/ /usr/bin
 RUN chmod a+x /usr/bin/azuracast_* && \
-    chmod a+x /usr/bin/locale_*
+    chmod a+x /usr/bin/locale_* && \
+    chmod a+x /usr/bin/cron
+
+RUN curl -L https://github.com/dshearer/jobber/releases/download/v1.3.2/jobber_1.3.2-1_amd64_ubuntu16.deb > jobber.deb && \
+    dpkg -i jobber.deb && \
+    apt-get install -f && \
+    rm jobber.deb
+
+ADD ./jobber.yml /var/azuracast/.jobber
+
+RUN chown azuracast:azuracast /var/azuracast/.jobber && \
+    chmod 644 /var/azuracast/.jobber
 
 # Clone repo and set up AzuraCast repo
 USER azuracast
 
+# Alert AzuraCast that it's running in Docker mode
+RUN touch /var/azuracast/.docker 
+
 WORKDIR /var/azuracast/www
 
 RUN git clone https://github.com/AzuraCast/AzuraCast.git . \
-    && composer install
+    && composer install --no-dev
 
 VOLUME /var/azuracast/www
 

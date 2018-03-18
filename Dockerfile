@@ -1,35 +1,35 @@
-FROM ubuntu:xenial
+FROM alpine:3.7
 
 # Install essential packages
-RUN apt-get update && \
-    apt-get install -q -y --no-install-recommends apt-transport-https curl wget tar \
-        python-software-properties software-properties-common pwgen whois lnav sudo \
-        zip unzip git
+RUN apk add --update curl wget tar zip unzip git sudo ca-certificates
 
 # Create azuracast user.
-RUN adduser --home /var/azuracast --disabled-password --gecos "" azuracast \
+RUN adduser -h /var/azuracast -g "" -D azuracast \
     && mkdir -p /var/azuracast/www \
     && mkdir -p /var/azuracast/www_tmp \
     && chown -R azuracast:azuracast /var/azuracast \
     && chmod -R 777 /var/azuracast/www_tmp \
     && echo 'azuracast ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 
-# Install PHP 7.2
-RUN LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php \
-    && apt-get update \
-    && apt-get install -q -y --no-install-recommends php7.2-fpm php7.2-cli php7.2-gd \
-     php7.2-curl php7.2-xml php7.2-zip php7.2-mysqlnd php7.2-mbstring php7.2-intl php7.2-redis
+# Add PHP repository key and repo URL
+RUN curl https://php.codecasts.rocks/php-alpine.rsa.pub -o /etc/apk/keys/php-alpine.rsa.pub \
+    && echo "@php https://php.codecasts.rocks/v3.7/php-7.2" >> /etc/apk/repositories
+
+# Install PHP 7.2 and modules
+RUN apk add --update php7@php php7-fpm@php \
+    php7-gd@php php7-curl@php php7-xml@php php7-zip@php php7-mysqlnd@php \
+    php7-mbstring@php php7-intl@php php7-redis@php
 
 RUN mkdir -p /run/php
 RUN touch /run/php/php7.2-fpm.pid
 
-COPY ./php.ini /etc/php/7.2/fpm/conf.d/05-azuracast.ini
-COPY ./php.ini /etc/php/7.2/cli/conf.d/05-azuracast.ini
-COPY ./phpfpmpool.conf /etc/php/7.2/fpm/pool.d/www.conf
+COPY ./php.ini /etc/php7/conf.d/05-azuracast.ini
+COPY ./phpfpmpool.conf /etc/php7/php-fpm.d/www.conf
 
 # Install composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
 
+# TODO: Figure out locales on Alpine
 # Set up locales
 COPY locale.gen /etc/locale.gen
 

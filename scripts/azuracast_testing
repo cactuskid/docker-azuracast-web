@@ -6,7 +6,7 @@ echo "Installing AzuraCast (Functional Testing Mode)"
 sudo add-apt-repository -y ppa:ansible/ansible
 sudo apt-get update 
 sudo apt-get install -q -y --no-install-recommends python2.7 python-setuptools python-wheel python-mysqldb \
-    ansible php7-2.xdebug
+    ansible php7.2-xdebug
 
 cd /var/azuracast/www
 

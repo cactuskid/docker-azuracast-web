@@ -1,22 +1,22 @@
 [prefs]
   runLog:
     type: file
-    path: /var/azuracast/www_tmp/jobber.log
+    path: www_tmp/jobber.log
     maxFileLen: 1m
 
 [jobs]
 - name: LongSync
-  cmd: php /var/azuracast/www/util/cli.php sync:run long
+  cmd: php www/util/cli.php sync:run long
   time: 0 0 * * * *
 
 - name: MediumSync
-  cmd: php /var/azuracast/www/util/cli.php sync:run medium
+  cmd: php www/util/cli.php sync:run medium
   time: 0 */5 * * * *
 
 - name: ShortSync
-  cmd: php /var/azuracast/www/util/cli.php sync:run short
+  cmd: php www/util/cli.php sync:run short
   time: 0 * * * * *
 
 - name: NowPlayingSync
-  cmd: php /var/azuracast/www/util/cli.php sync:run nowplaying
+  cmd: php www/util/cli.php sync:run nowplaying
   time: "*/15 * * * * *"

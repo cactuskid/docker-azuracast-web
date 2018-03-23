@@ -3,6 +3,6 @@
 echo "Installing AzuraCast (Functional Testing Mode)"
 
 sudo ansible-playbook /var/azuracast/www/util/ansible/docker_install.yml --inventory=/var/azuracast/www/util/ansible/hosts --extra-vars "app_env=development testing_mode=true" && \
-    sudo apk add --no-cache php7-xdebug@php && \
+    sudo apt-get install -y php7.2-xdebug && \
     cd /var/azuracast/www && \
     sudo -u azuracast ./vendor/bin/codecept run --no-interaction --coverage --coverage-xml --fail-fast

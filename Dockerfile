@@ -30,18 +30,9 @@ COPY ./phpfpmpool.conf /etc/php/7.2/fpm/pool.d/www.conf
 # Install composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer
 
-# Install PIP and Ansible
-RUN add-apt-repository -y ppa:ansible/ansible && \
-    apt-get update && \
-    apt-get install -q -y --no-install-recommends python2.7 python-pip python-setuptools \
-      python-wheel python-mysqldb ansible && \
-    pip install --upgrade pip && \
-    pip install influxdb
-
 # AzuraCast installer and update commands
-COPY scripts/ /usr/bin
-RUN chmod a+x /usr/bin/azuracast_* && \
-    chmod a+x /usr/bin/cron
+COPY scripts/ /usr/local/bin
+RUN chmod -R a+x /usr/local/bin
 
 RUN curl -L https://github.com/dshearer/jobber/releases/download/v1.3.2/jobber_1.3.2-1_amd64_ubuntu16.deb > jobber.deb && \
     dpkg -i jobber.deb && \
@@ -52,7 +43,9 @@ ADD ./jobber.conf.yml /etc/jobber.conf
 ADD ./jobber.yml /var/azuracast/.jobber
 
 RUN chown azuracast:azuracast /var/azuracast/.jobber && \
-    chmod 644 /var/azuracast/.jobber
+    chmod 644 /var/azuracast/.jobber && \
+    mkdir -p /var/jobber/1000 && \ 
+    chown -R azuracast:azuracast /var/jobber/1000 
 
 # Clone repo and set up AzuraCast repo
 USER azuracast

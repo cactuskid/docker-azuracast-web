@@ -2,25 +2,17 @@
 
 cd /var/azuracast/www
 
-while test $# -gt 0; do
-    case "$1" in
-        --dev)
-            APP_ENV="development"
-            shift
-            ;;
+APPLICATION_ENV="${APPLICATION_ENV:-production}"
 
-        *)
-            break
-            ;;
-    esac
-done
+echo "Updating AzuraCast (Environment: $APPLICATION_ENV)"
 
-APP_ENV="${APP_ENV:-production}"
-
-echo "Updating AzuraCast (Environment: $APP_ENV)"
-
-if [ $APP_ENV = "production" ]; then
+if [ $APPLICATION_ENV = "production" ]; then
     git reset --hard && git pull
 fi
 
-sudo ansible-playbook util/ansible/docker_install.yml --inventory=util/ansible/hosts --extra-vars "app_env=$APP_ENV"
+# Install ansible
+sudo add-apt-repository -y ppa:ansible/ansible
+sudo apt-get update 
+sudo apt-get install -q -y --no-install-recommends python2.7 python-setuptools python-wheel python-mysqldb ansible
+
+sudo ansible-playbook util/ansible/docker_install.yml --inventory=util/ansible/hosts --extra-vars "app_env=$APPLICATION_ENV"

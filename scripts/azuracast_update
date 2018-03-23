@@ -2,25 +2,23 @@
 
 cd /var/azuracast/www
 
-while test $# -gt 0; do
-    case "$1" in
-        --dev)
-            APP_ENV="development"
-            shift
-            ;;
+APPLICATION_ENV="${APPLICATION_ENV:-production}"
 
-        *)
-            break
-            ;;
-    esac
-done
+echo "Updating AzuraCast (Environment: $APPLICATION_ENV)"
 
-APP_ENV="${APP_ENV:-production}"
-
-echo "Updating AzuraCast (Environment: $APP_ENV)"
-
-if [ $APP_ENV = "production" ]; then
+if [ $APPLICATION_ENV = "production" ]; then
     git reset --hard && git pull
+    composer install --no-dev
+else
+    composer install
 fi
 
-ansible-playbook util/ansible/docker_update.yml --inventory=util/ansible/hosts --extra-vars "app_env=$APP_ENV update_revision=10"
+php util/cli.php cache:clear
+
+rm -rf /var/azuracast/www_tmp/*
+
+php util/cli.php migrations:migrate --no-interaction --allow-no-migration
+
+php util/cli.php orm:generate-proxies
+
+php util/cli.php azuracast:radio:restart

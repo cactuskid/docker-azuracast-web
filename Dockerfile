@@ -3,8 +3,7 @@ FROM ubuntu:xenial
 # Install essential packages
 RUN apt-get update && \
     apt-get install -q -y --no-install-recommends apt-transport-https curl wget tar \
-        python-software-properties software-properties-common pwgen whois lnav sudo \
-        zip unzip git
+        python-software-properties software-properties-common sudo zip unzip git
 
 # Create azuracast user.
 RUN adduser --home /var/azuracast --disabled-password --gecos "" azuracast \

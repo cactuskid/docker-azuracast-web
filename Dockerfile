@@ -33,6 +33,7 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin -
 COPY scripts/ /usr/local/bin
 RUN chmod -R a+x /usr/local/bin
 
+# Install Jobber
 RUN curl -L https://github.com/dshearer/jobber/releases/download/v1.3.2/jobber_1.3.2-1_amd64_ubuntu16.deb > jobber.deb && \
     dpkg -i jobber.deb && \
     apt-get install -f && \
@@ -46,11 +47,17 @@ RUN chown azuracast:azuracast /var/azuracast/.jobber && \
     mkdir -p /var/jobber/1000 && \ 
     chown -R azuracast:azuracast /var/jobber/1000 
 
+# Install Dockerize
+ENV DOCKERIZE_VERSION v0.6.1
+RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+    && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
+    && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+
 # Clone repo and set up AzuraCast repo
 USER azuracast
 
 # Alert AzuraCast that it's running in Docker mode
-RUN touch /var/azuracast/.docker 
+RUN touch /var/azuracast/.docker
 
 WORKDIR /var/azuracast/www
 
@@ -60,5 +67,7 @@ RUN git clone https://github.com/AzuraCast/AzuraCast.git . \
 VOLUME /var/azuracast/www
 
 USER root
+
+ENTRYPOINT ["dockerize","-wait","tcp://mariadb:3306","-wait","tcp://influxdb:8086","-timeout","10s"]
 
 CMD ["/usr/sbin/php-fpm7.2", "-F", "--fpm-config", "/etc/php/7.2/fpm/php-fpm.conf", "-c", "/etc/php/7.2/fpm/"]

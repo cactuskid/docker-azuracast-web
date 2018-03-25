@@ -1,7 +1,7 @@
 [prefs]
   runLog:
     type: file
-    path: /var/azuracast/www_tmp/jobber.log
+    path: /tmp/jobber.log
     maxFileLen: 1m
 
 [jobs]

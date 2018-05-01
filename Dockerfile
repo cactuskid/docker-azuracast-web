@@ -1,9 +1,18 @@
-FROM ubuntu:xenial
+FROM ubuntu:bionic
+
+# Set time zone
+ENV TZ 'UTC'
+RUN echo $TZ > /etc/timezone
+
+# Avoid ERROR: invoke-rc.d: policy-rc.d denied execution of start.
+RUN sed -i "s/^exit 101$/exit 0/" /usr/sbin/policy-rc.d
 
 # Install essential packages
 RUN apt-get update && \
-    apt-get install -q -y --no-install-recommends apt-transport-https curl wget tar \
-        python-software-properties software-properties-common sudo zip unzip git
+    DEBIAN_FRONTEND=noninteractive apt-get install -q -y --no-install-recommends apt-transport-https \
+        curl wget tar software-properties-common sudo zip unzip git tzdata \
+        php7.2-fpm php7.2-cli php7.2-gd \
+        php7.2-curl php7.2-xml php7.2-zip php7.2-mysqlnd php7.2-mbstring php7.2-intl php7.2-redis
 
 # Create azuracast user.
 RUN adduser --home /var/azuracast --disabled-password --gecos "" azuracast \
@@ -14,11 +23,6 @@ RUN adduser --home /var/azuracast --disabled-password --gecos "" azuracast \
     && echo 'azuracast ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 
 # Install PHP 7.2
-RUN LC_ALL=C.UTF-8 add-apt-repository -y ppa:ondrej/php \
-    && apt-get update \
-    && apt-get install -q -y --no-install-recommends php7.2-fpm php7.2-cli php7.2-gd \
-     php7.2-curl php7.2-xml php7.2-zip php7.2-mysqlnd php7.2-mbstring php7.2-intl php7.2-redis
-
 RUN mkdir -p /run/php
 RUN touch /run/php/php7.2-fpm.pid
 
@@ -36,7 +40,7 @@ RUN chmod -R a+x /usr/local/bin
 # Install Jobber
 RUN curl -L https://github.com/dshearer/jobber/releases/download/v1.3.2/jobber_1.3.2-1_amd64_ubuntu16.deb > jobber.deb && \
     dpkg -i jobber.deb && \
-    apt-get install -f && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -f && \
     rm jobber.deb
 
 ADD ./jobber.conf.yml /etc/jobber.conf

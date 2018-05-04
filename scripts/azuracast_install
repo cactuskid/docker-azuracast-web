@@ -8,11 +8,18 @@ echo "Updating AzuraCast (Environment: $APPLICATION_ENV)"
 
 if [ $APPLICATION_ENV = "production" ]; then
     git reset --hard && git pull
+    composer install --no-dev
+else
+    composer install
 fi
 
-# Install ansible
-sudo add-apt-repository -y ppa:ansible/ansible
-sudo apt-get update 
-sudo apt-get install -q -y --no-install-recommends python2.7 python-setuptools python-wheel python-mysqldb ansible
+azuracast_cli azuracast:setup:influx
+azuracast_cli cache:clear
+azuracast_cli migrations:migrate --no-interaction --allow-no-migration
 
-sudo ansible-playbook util/ansible/docker_install.yml --inventory=util/ansible/hosts --extra-vars "app_env=$APPLICATION_ENV"
+if [ $APPLICATION_ENV = "development" ]; then
+    azuracast_cli azuracast:setup:fixtures
+fi
+
+azuracast_cli cache:clear
+azuracast_cli azuracast:radio:restart

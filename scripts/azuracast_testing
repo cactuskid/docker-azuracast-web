@@ -1,14 +1,9 @@
 #!/usr/bin/env bash
 
-echo "Installing AzuraCast (Functional Testing Mode)"
+echo "Running AzuraCast Tests"
 
-# Install ansible
-sudo add-apt-repository -y ppa:ansible/ansible
 sudo apt-get update 
-sudo apt-get install -q -y --no-install-recommends python2.7 python-setuptools python-wheel python-mysqldb \
-    ansible php7.2-xdebug
+sudo apt-get install -q -y php7.2-xdebug
 
 cd /var/azuracast/www
-
-sudo ansible-playbook util/ansible/docker_install.yml --inventory=util/ansible/hosts --extra-vars "app_env=development testing_mode=true" && \
-    ./vendor/bin/codecept run --no-interaction --coverage --coverage-xml --fail-fast
+./vendor/bin/codecept run --no-interaction --coverage --coverage-xml --fail-fast

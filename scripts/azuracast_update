@@ -13,14 +13,4 @@ else
     composer install
 fi
 
-php util/cli.php cache:clear
-
-rm -rf /var/azuracast/www_tmp/*
-mkdir -p /var/azuracast/www_tmp/proxies
-chmod -R 755 /var/azuracast/www_tmp/proxies
-
-php util/cli.php migrations:migrate --no-interaction --allow-no-migration
-
-php util/cli.php orm:generate-proxies
-
-php util/cli.php azuracast:radio:restart
+php util/cli.php azuracast:setup --update

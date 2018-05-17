@@ -4,7 +4,7 @@ cd /var/azuracast/www
 
 APPLICATION_ENV="${APPLICATION_ENV:-production}"
 
-echo "Updating AzuraCast (Environment: $APPLICATION_ENV)"
+echo "Installing AzuraCast (Environment: $APPLICATION_ENV)"
 
 if [ $APPLICATION_ENV = "production" ]; then
     git reset --hard && git pull
@@ -18,13 +18,4 @@ else
     composer install
 fi
 
-azuracast_cli azuracast:setup:influx
-azuracast_cli cache:clear
-azuracast_cli migrations:migrate --no-interaction --allow-no-migration
-
-if [ $APPLICATION_ENV = "development" ]; then
-    azuracast_cli azuracast:setup:fixtures
-fi
-
-azuracast_cli cache:clear
-azuracast_cli azuracast:radio:restart
+azuracast_cli azuracast:setup

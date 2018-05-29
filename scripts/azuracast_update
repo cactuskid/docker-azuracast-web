@@ -13,4 +13,4 @@ else
     composer install
 fi
 
-php util/cli.php azuracast:setup --update
+php util/cli.php azuracast:setup --update $*

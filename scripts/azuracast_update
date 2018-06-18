@@ -7,10 +7,7 @@ APPLICATION_ENV="${APPLICATION_ENV:-production}"
 echo "Updating AzuraCast (Environment: $APPLICATION_ENV)"
 
 if [ $APPLICATION_ENV = "production" ]; then
-    cd /var/azuracast \
-        && rm -rf www \
-        && mkdir www \
-        && cd www \
+    rm -rf ./{*,.*} \
         && wget https://github.com/AzuraCast/AzuraCast/archive/master.tar.gz \
         && tar -xzvf master.tar.gz --strip-components 1 \
         && rm master.tar.gz \

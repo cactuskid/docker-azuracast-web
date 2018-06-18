@@ -7,8 +7,14 @@ APPLICATION_ENV="${APPLICATION_ENV:-production}"
 echo "Installing AzuraCast (Environment: $APPLICATION_ENV)"
 
 if [ $APPLICATION_ENV = "production" ]; then
-    git reset --hard && git pull
-    composer install --no-dev
+    cd /var/azuracast \
+        && rm -rf www \
+        && mkdir www \
+        && cd www \
+        && wget https://github.com/AzuraCast/AzuraCast/archive/master.tar.gz \
+        && tar -xzvf master.tar.gz --strip-components 1 \
+        && rm master.tar.gz \
+        && composer install -o --no-dev
 else
     if [ $APPLICATION_ENV = "testing" ]; then
         sudo mkdir -p vendor

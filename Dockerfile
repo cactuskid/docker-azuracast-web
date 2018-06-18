@@ -46,10 +46,10 @@ RUN curl -L https://github.com/dshearer/jobber/releases/download/v1.3.2/jobber_1
 ADD ./jobber.conf.yml /etc/jobber.conf
 ADD ./jobber.yml /var/azuracast/.jobber
 
-RUN chown azuracast:azuracast /var/azuracast/.jobber && \
-    chmod 644 /var/azuracast/.jobber && \
-    mkdir -p /var/jobber/1000 && \ 
-    chown -R azuracast:azuracast /var/jobber/1000 
+RUN chown azuracast:azuracast /var/azuracast/.jobber \
+    && chmod 644 /var/azuracast/.jobber \
+    && mkdir -p /var/jobber/1000 \
+    && chown -R azuracast:azuracast /var/jobber/1000 
 
 # Install Dockerize
 ENV DOCKERIZE_VERSION v0.6.1
@@ -65,8 +65,10 @@ RUN touch /var/azuracast/.docker
 
 WORKDIR /var/azuracast/www
 
-RUN git clone https://github.com/AzuraCast/AzuraCast.git . \
-    && composer install --no-dev
+RUN wget https://github.com/AzuraCast/AzuraCast/archive/master.tar.gz \
+    && tar -xzvf master.tar.gz --strip-components 1 \
+    && rm master.tar.gz \
+    && composer install -o --no-dev
 
 VOLUME /var/azuracast/www
 

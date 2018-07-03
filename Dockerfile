@@ -18,6 +18,7 @@ RUN apt-get update && \
 RUN adduser --home /var/azuracast --disabled-password --gecos "" azuracast \
     && mkdir -p /var/azuracast/www \
     && mkdir -p /var/azuracast/www_tmp \
+    && mkdir -p /var/azuracast/geoip \
     && chown -R azuracast:azuracast /var/azuracast \
     && chmod -R 777 /var/azuracast/www_tmp \
     && echo 'azuracast ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
@@ -50,6 +51,12 @@ RUN chown azuracast:azuracast /var/azuracast/.jobber \
     && chmod 644 /var/azuracast/.jobber \
     && mkdir -p /var/jobber/1000 \
     && chown -R azuracast:azuracast /var/jobber/1000 
+
+# Install MaxMind GeoIP Lite
+RUN wget http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.tar.gz \
+    && tar -C /var/azuracast/geoip -xzvf GeoLite2-City.tar.gz --strip-components 1 \
+    && rm GeoLite2-City.tar.gz \
+    && chown -R azuracast:azuracast /var/azuracast/geoip
 
 # Install Dockerize
 ENV DOCKERIZE_VERSION v0.6.1

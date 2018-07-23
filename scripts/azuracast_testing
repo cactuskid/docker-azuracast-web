@@ -2,8 +2,5 @@
 
 echo "Running AzuraCast Tests"
 
-sudo apt-get update 
-sudo apt-get install -q -y php7.2-xdebug
-
 cd /var/azuracast/www
 ./vendor/bin/codecept run --no-interaction --coverage --coverage-xml --fail-fast

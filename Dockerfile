@@ -1,7 +1,7 @@
 FROM ubuntu:bionic
 
 # Set time zone
-ENV TZ 'UTC'
+ENV TZ="UTC"
 RUN echo $TZ > /etc/timezone
 
 # Avoid ERROR: invoke-rc.d: policy-rc.d denied execution of start.
@@ -59,7 +59,7 @@ RUN wget http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.tar.gz
     && chown -R azuracast:azuracast /var/azuracast/geoip
 
 # Install Dockerize
-ENV DOCKERIZE_VERSION v0.6.1
+ENV DOCKERIZE_VERSION="v0.6.1"
 RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz

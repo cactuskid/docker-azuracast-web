@@ -81,6 +81,6 @@ VOLUME /var/azuracast/www
 
 USER root
 
-ENTRYPOINT ["dockerize","-wait","tcp://mariadb:3306","-wait","tcp://influxdb:8086","-timeout","10s"]
+ENTRYPOINT ["dockerize","-wait","tcp://mariadb:3306","-wait","tcp://influxdb:8086","-timeout","20s"]
 
 CMD ["/usr/sbin/php-fpm7.2", "-F", "--fpm-config", "/etc/php/7.2/fpm/php-fpm.conf", "-c", "/etc/php/7.2/fpm/"]

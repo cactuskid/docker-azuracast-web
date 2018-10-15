@@ -1,22 +1,36 @@
-[prefs]
+version: 1.4
+
+prefs:
   runLog:
-    type: file
-    path: /tmp/jobber.log
-    maxFileLen: 1m
+    type: memory
+    maxLen: 500
 
-[jobs]
-- name: LongSync
-  cmd: php /var/azuracast/www/util/cli.php sync:run long
-  time: 0 0 * * * *
+resultSinks:
+- &stdoutSink
+  type: stdout
+  data: [stdout, stderr]
 
-- name: MediumSync
-  cmd: php /var/azuracast/www/util/cli.php sync:run medium
-  time: 0 */5 * * * *
+jobs:
+  LongSync:
+    cmd: "php /var/azuracast/www/util/cli.php sync:run long"
+    time: "0 0 * * * *"
+    notifyOnSuccess: [*stdoutSink]
+    notifyOnError: [*stdoutSink]
 
-- name: ShortSync
-  cmd: php /var/azuracast/www/util/cli.php sync:run short
-  time: 0 * * * * *
+  MediumSync:
+    cmd: "php /var/azuracast/www/util/cli.php sync:run medium"
+    time: "0 */5 * * * *"
+    notifyOnSuccess: [*stdoutSink]
+    notifyOnError: [*stdoutSink]
 
-- name: NowPlayingSync
-  cmd: php /var/azuracast/www/util/cli.php sync:run nowplaying
-  time: "*/15 * * * * *"
+  ShortSync:
+    cmd: "php /var/azuracast/www/util/cli.php sync:run short"
+    time: "0 * * * * *"
+    notifyOnSuccess: [*stdoutSink]
+    notifyOnError: [*stdoutSink]
+
+  NowPlayingSync:
+    cmd: "php /var/azuracast/www/util/cli.php sync:run nowplaying"
+    time: "*/15 * * * * *"
+    notifyOnSuccess: [*stdoutSink]
+    notifyOnError: [*stdoutSink]

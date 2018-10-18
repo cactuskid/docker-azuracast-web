@@ -93,6 +93,14 @@ VOLUME /var/azuracast/www
 
 USER root
 
-ENTRYPOINT ["dockerize","-wait","tcp://mariadb:3306","-wait","tcp://influxdb:8086","-timeout","20s"]
+# Sensible default environment variables.
+ENV APPLICATION_ENV="production" \
+    MYSQL_HOST="mariadb" \
+    MYSQL_PORT=3306 \
+    MYSQL_USER="azuracast" \
+    MYSQL_PASSWORD="azur4c457" \
+    MYSQL_DATABASE="azuracast"
 
+# Entrypoint and default command
+ENTRYPOINT ["dockerize","-wait","tcp://mariadb:3306","-wait","tcp://influxdb:8086","-timeout","20s"]
 CMD ["/usr/sbin/php-fpm7.2", "-F", "--fpm-config", "/etc/php/7.2/fpm/php-fpm.conf", "-c", "/etc/php/7.2/fpm/"]

@@ -84,9 +84,7 @@ RUN touch /var/azuracast/.docker
 
 WORKDIR /var/azuracast/www
 
-RUN wget https://github.com/AzuraCast/AzuraCast/archive/master.tar.gz \
-    && tar -xzvf master.tar.gz --strip-components 1 \
-    && rm master.tar.gz \
+RUN git clone --depth 1 https://github.com/AzuraCast/AzuraCast.git \
     && composer install -o --no-dev
 
 VOLUME /var/azuracast/www

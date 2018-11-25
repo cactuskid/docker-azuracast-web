@@ -5,10 +5,13 @@ RUN apt-get update && \
 
 WORKDIR /go/src/app
 
+ARG JOBBER_COMMIT=2674486141de812de8b2d053f1edc54a0593dbfd
+
 RUN mkdir -p src/github.com/dshearer \
     && cd src/github.com/dshearer \
     && git clone https://github.com/dshearer/jobber.git \
     && cd jobber \
+    && git reset --hard $JOBBER_COMMIT \
     && make check \
     && make install
 

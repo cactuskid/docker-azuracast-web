@@ -11,7 +11,7 @@ if [[ "$1" == '--' ]]; then shift; fi
 
 cd /var/azuracast/www
 
-if [ !-d .git ]; then
+if [ ! -d .git ]; then
     echo "Could not update; filesystem is not up to date."
     echo "Try running './docker.sh update-self' first!"
     exit
@@ -30,8 +30,8 @@ if [ $APPLICATION_ENV = "production" ]; then
 
     git reset --hard
 
-    if [ release_update = 1 ]; then
-        if [ current_tag = latest_tag ]; then 
+    if [ $release_update = 1 ]; then
+        if [ $current_tag = $latest_tag ]; then 
             echo "You are already on the latest version (${current_tag}); no code update needed."
         else
             echo "Upgrading from ${current_tag} to ${latest_tag}..."

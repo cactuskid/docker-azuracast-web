@@ -1,13 +1,51 @@
 #!/usr/bin/env bash
 
+release_update=0
+
+while [[ "$1" =~ ^- && ! "$1" == "--" ]]; do case $1 in
+  -r | --release )
+    release_update=1
+    ;;
+esac; shift; done
+if [[ "$1" == '--' ]]; then shift; fi
+
 cd /var/azuracast/www
+
+if [ !-d .git ]; then
+    echo "Could not update; filesystem is not up to date."
+    echo "Try running './docker.sh update-self' first!"
+    exit
+fi
 
 APPLICATION_ENV="${APPLICATION_ENV:-production}"
 
 echo "Updating AzuraCast (Environment: $APPLICATION_ENV)"
 
 if [ $APPLICATION_ENV = "production" ]; then
-    git reset --hard && git pull
+    current_hash=$(git rev-parse HEAD)
+    current_tag=$(git describe --abbrev=0 --tags)
+
+    git fetch --tags
+    latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
+
+    git reset --hard
+
+    if [ release_update = 1 ]; then
+        if [ current_tag = latest_tag ]; then 
+            echo "You are already on the latest version (${current_tag}); no code update needed."
+        else
+            echo "Upgrading from ${current_tag} to ${latest_tag}..."
+            
+            git pull
+            git reset --hard $latest_tag
+        fi
+    else
+        echo "Updating to the latest rolling-release version..."
+        echo "Tip: use the '--release' flag to update to tagged releases only."
+
+        git pull
+    fi
+
     composer install -o --no-dev
 else
     composer install

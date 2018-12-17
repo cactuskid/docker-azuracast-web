@@ -87,7 +87,7 @@ RUN touch /var/azuracast/.docker
 
 WORKDIR /var/azuracast/www
 
-RUN git clone --shallow-since=2018-10-01 https://github.com/AzuraCast/AzuraCast.git . \
+RUN git clone --shallow-since=2018-11-15 https://github.com/AzuraCast/AzuraCast.git . \
     && composer install -o --no-dev
 
 VOLUME /var/azuracast/www

@@ -2,6 +2,7 @@
 
 update_mode=0
 release_update=0
+original_args=$*
 
 while [[ "$1" =~ ^- && ! "$1" == "--" ]]; do case $1 in
   --update )
@@ -67,4 +68,4 @@ else
     composer install
 fi
 
-azuracast_cli azuracast:setup $*
+azuracast_cli azuracast:setup ${original_args}

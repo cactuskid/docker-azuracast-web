@@ -1,13 +1,62 @@
 #!/usr/bin/env bash
 
+update_mode=0
+release_update=0
+
+while [[ "$1" =~ ^- && ! "$1" == "--" ]]; do case $1 in
+  --update )
+    update_mode=1
+    ;;
+
+  -r | --release )
+    release_update=1
+    ;;
+esac; shift; done
+if [[ "$1" == '--' ]]; then shift; fi
+
 cd /var/azuracast/www
 
-APPLICATION_ENV="${APPLICATION_ENV:-production}"
+if [ ! -d .git ]; then
+    echo "Could not update; filesystem is not up to date."
+    echo "Try running './docker.sh update-self' first!"
+    exit
+fi
 
-echo "Installing AzuraCast (Environment: $APPLICATION_ENV)"
+if [ $update_mode = 1 ]; then
+    echo "Updating AzuraCast..."
+else
+    echo "Installing AzuraCast..."
+fi
+
+APPLICATION_ENV="${APPLICATION_ENV:-production}"
+echo "(Environment: $APPLICATION_ENV)"
 
 if [ $APPLICATION_ENV = "production" ]; then
-    git reset --hard && git pull
+    if [ $release_update = 1 ]; then
+        current_hash=$(git rev-parse HEAD)
+        current_tag=$(git describe --abbrev=0 --tags)
+
+        git fetch --tags
+        latest_tag=$(git describe --abbrev=0 --tags)
+
+        git reset --hard
+
+        if [ $current_tag = $latest_tag ]; then 
+            echo "You are already on the latest version (${current_tag})!"
+        else
+            echo "Updating codebase from ${current_tag} to ${latest_tag}..."
+            
+            git pull
+            git reset --hard $latest_tag
+        fi
+    else
+        echo "Updating to the latest rolling-release version..."
+        echo "Tip: use the '--release' flag to update to tagged releases only."
+
+        git reset --hard
+        git pull
+    fi
+
     composer install -o --no-dev
 else
     if [ $APPLICATION_ENV = "testing" ]; then

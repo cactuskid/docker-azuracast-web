@@ -23,6 +23,12 @@ jobs:
     notifyOnSuccess: [*stdoutSink]
     notifyOnError: [*stdoutSink]
 
+  QueueWorker:
+    cmd: "php /var/azuracast/www/util/cli.php queue:process 275"
+    time: "0 */5 * * * *"
+    notifyOnSuccess: [*stdoutSink]
+    notifyOnError: [*stdoutSink]
+
   ShortSync:
     cmd: "php /var/azuracast/www/util/cli.php sync:run short"
     time: "0 * * * * *"
